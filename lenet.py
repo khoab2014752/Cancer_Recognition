@@ -28,7 +28,7 @@ from imblearn.over_sampling import RandomOverSampler, SMOTE
 # path="./chan/"
 # categories = ['BD_KT', 'chan_1', 'chan_2','DT_mu']
 
-path="D://Khoa/Types/"
+path="D://Khoa/Cancer_Recognition/Types/"
 categories = ['healthy', 'malignant', 'benign', 'other']
 
 # path="./bung/"
@@ -48,9 +48,8 @@ categories = ['healthy', 'malignant', 'benign', 'other']
 data = []#dữ liệu
 labels = []#nhãn
 imagePaths = []
-HEIGHT = 24
-WIDTH = 24
-
+HEIGHT = 64
+WIDTH = 64
 N_CHANNELS = 3
 
 # ===========================lay ngau nhien anh===================================
@@ -75,9 +74,9 @@ for imagePath in imagePaths:
 data = np.array(data, dtype="float") / 255.0
 labels = np.array(labels)
 
-plt.subplots(3,4)
-for i in range(12):
-    plt.subplot(3,4, i+1)
+plt.subplots(4,4)
+for i in range(16):
+    plt.subplot(4,4, i+1)
     plt.imshow(data[i])
     plt.axis('off')
     plt.title(categories[labels[i]])
@@ -87,19 +86,13 @@ for i in range(12):
 
 
 # Early stopping
-# earlystop_callback = tf.keras.callbacks.EarlyStopping(
-#     monitor='loss',  # Monitor validation loss
-#     min_delta=0.0001,    # Minimum change to be considered an improvement
-#     patience=10,          # Stop training if no improvement for 10 epochs
-#     mode='min'           # 'min' for loss, 'max' for accuracy
-# )
 
-earlystop_callback = tf.keras.callbacks.EarlyStopping(
-    monitor='accuracy',  # Monitor validation loss
-    min_delta=0.0001,    # Minimum change to be considered an improvement
-    patience=10,          # Stop training if no improvement for 10 epochs
-    mode='max'           # 'min' for loss, 'max' for accuracy
-)
+#     earlystop_callback = tf.keras.callbacks.EarlyStopping(
+#     monitor='accuracy',  # Monitor validation loss
+#     min_delta=0.001,    # Minimum change to be considered an improvement
+#     patience=10,          # Stop training if no improvement for 10 epochs
+#     mode='max'           # 'min' for loss, 'max' for accuracy
+# )
 
 
 
@@ -107,17 +100,24 @@ earlystop_callback = tf.keras.callbacks.EarlyStopping(
 
 
 #===
-EPOCHS = 100
-
-BS =32
+EPOCHS = 200
+BS=32
 Acc=[]
 Precision = []
 Recall = []
 F1 = []
-i=0
+index=0
 learning_rate=0.001
-while i<10:
+earlystop_callback = tf.keras.callbacks.EarlyStopping(
+    monitor='loss',  # Monitor validation loss
+    min_delta=0.001,    # Minimum change to be considered an improvement
+    patience=10,          # Stop training if no improvement for 10 epochs
+    mode='min'           # 'min' for loss, 'max' for accuracy
+)
+while index<1:
     
+    
+
     (trainX, testX, trainY, testY) = train_test_split(data, labels, test_size=0.2, random_state=30)# random_state=30)
     trainY = keras.utils.to_categorical(trainY, len(categories))
     class_names = categories
@@ -137,7 +137,7 @@ while i<10:
 
     model.fit(trainX, trainY, batch_size=BS, epochs=EPOCHS, verbose=1, callbacks=[earlystop_callback])
 
-    model.save('lenet[' + str(i)  + '].keras')
+    model.save('lenet[' + str(index)  + '].keras')
     # ==========================kiem tra su dung cua mo hinh====================================
 
     from numpy import argmax
@@ -146,25 +146,25 @@ while i<10:
     pred = model.predict(testX)
     predictions = argmax(pred, axis=1) # return to label
 
-    # cm = confusion_matrix(testY, predictions)
+    cm = confusion_matrix(testY, predictions)
 
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111)
-    # cax = ax.matshow(cm)
-    # plt.title('Model confusion matrix of' +str(i+1))
-    # fig.colorbar(cax)
-    # ax.set_xticklabels([''] + categories)
-    # ax.set_yticklabels([''] + categories)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    cax = ax.matshow(cm)
+    plt.title('Model confusion matrix of' +str(i+1))
+    fig.colorbar(cax)
+    ax.set_xticklabels([''] + categories)
+    ax.set_yticklabels([''] + categories)
 
-    # for i in range(len(class_names)):
-    #     for j in range(len(class_names)):
-    #         ax.text(i, j, cm[j, i], va='center', ha='center')
+    for i in range(len(class_names)):
+        for j in range(len(class_names)):
+            ax.text(i, j, cm[j, i], va='center', ha='center')
 
-    # plt.xlabel('Predicted')
-    # plt.ylabel('True')
-    # # plt.show()
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    
 
-    print("Run:",i+1)
+    print("Run:",index+1)
     print("\n")
     accuracy = accuracy_score(testY, predictions)
     Acc.append(accuracy)
@@ -194,12 +194,10 @@ while i<10:
     print('Pre:', Precision)
     print('Recall:',Recall)
     print('F1:', F1)
-    print("Current i: ",i)
-    i= i+1
-
-    #Learning rate đi từ 0.001 -> 0.005
-    learning_rate =+ 0.001
-    
+    print("Current index: ",index)
+    index= index+1
+plt.show()
+  
 print("Max index of acc",Acc.index(max(Acc))) 
 print("Max index of pre",Precision.index(max(Precision))) 
 print("Max index of recall",Recall.index(max(Recall))) 
