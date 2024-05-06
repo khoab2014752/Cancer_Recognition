@@ -17,6 +17,8 @@ from sklearn.preprocessing import StandardScaler
 from imblearn.under_sampling import RandomUnderSampler, TomekLinks
 from imblearn.over_sampling import RandomOverSampler, SMOTE
 
+
+
 # ========================duong dan======================================
 
 # path="./vtho/"
@@ -48,8 +50,8 @@ categories = ['healthy', 'malignant', 'benign', 'other']
 data = []#dữ liệu
 labels = []#nhãn
 imagePaths = []
-HEIGHT = 64
-WIDTH = 64
+HEIGHT = 16
+WIDTH = 16
 N_CHANNELS = 3
 
 # ===========================lay ngau nhien anh===================================
