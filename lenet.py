@@ -18,6 +18,8 @@ from imblearn.under_sampling import RandomUnderSampler, TomekLinks
 from imblearn.over_sampling import RandomOverSampler, SMOTE
 
 
+#Tim hieu cach deploy len web - Khoa, Huan Luyen + plot mot cai learning curve
+#Tim hieu cach deploy len dien thoai - DAM, Them 2 mo hinh ngoai CNN
 
 # ========================duong dan======================================
 
@@ -69,7 +71,7 @@ random.shuffle(imagePaths)
 for imagePath in imagePaths:
     image = cv2.imread(imagePath[0])
     
-    image = cv2.resize(image, (WIDTH, HEIGHT))  # .flatten()
+    image = cv2.resize(image, (WIDTH, HEIGHT)) 
     data.append(image)
     label = imagePath[1]
     labels.append(label)
@@ -103,24 +105,23 @@ for i in range(16):
 
 #===
 EPOCHS = 200
-BS=32
+BS=16
 Acc=[]
 Precision = []
 Recall = []
 F1 = []
 index=0
-learning_rate=0.001
-earlystop_callback = tf.keras.callbacks.EarlyStopping(
+learning_rates = 0.0001
+
+while index<3:
+    learning_rate = learning_rates[index]
+    earlystop_callback = tf.keras.callbacks.EarlyStopping(
     monitor='loss',  # Monitor validation loss
-    min_delta=0.001,    # Minimum change to be considered an improvement
+    min_delta=0.01,    # Minimum change to be considered an improvement
     patience=10,          # Stop training if no improvement for 10 epochs
     mode='min'           # 'min' for loss, 'max' for accuracy
 )
-while index<1:
-    
-    
-
-    (trainX, testX, trainY, testY) = train_test_split(data, labels, test_size=0.2, random_state=30)# random_state=30)
+    (trainX, testX, trainY, testY) = train_test_split(data, labels, test_size=0.3, random_state=30)# random_state=30)
     trainY = keras.utils.to_categorical(trainY, len(categories))
     class_names = categories
     model = Sequential()
@@ -133,7 +134,7 @@ while index<1:
     model.add(Dense(84, activation='relu'))
     model.add(Dense(len(class_names), activation='softmax'))
 
-    model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Adam(learning_rate), metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Nadam(learning_rate), metrics=['accuracy'])
 
     print(model.summary())
 
@@ -164,7 +165,7 @@ while index<1:
 
     plt.xlabel('Predicted')
     plt.ylabel('True')
-    
+    plt.show()
 
     print("Run:",index+1)
     print("\n")
@@ -198,7 +199,8 @@ while index<1:
     print('F1:', F1)
     print("Current index: ",index)
     index= index+1
-plt.show()
+    
+
   
 print("Max index of acc",Acc.index(max(Acc))) 
 print("Max index of pre",Precision.index(max(Precision))) 
