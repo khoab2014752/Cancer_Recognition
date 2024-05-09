@@ -28,7 +28,7 @@ def majority_element(num_list):
 
 cap=cv2.VideoCapture(0)
 
-model=keras.models.load_model("lenet.h5", compile=False)
+model=keras.models.load_model("lenet[0].keras", compile=False)
 categories = ['healthy', 'malignant', 'benign', 'other']
 dem=0
 Majority=[]
@@ -38,9 +38,9 @@ while True:
     
     im_pil = PIL.Image.fromarray(img)
     image = img
-    image = cv2.resize(image, (32, 32))  # .flatten()
+    image = cv2.resize(image, (16, 16))  # .flatten()
     
-    im_resized = im_pil.resize((32, 32))
+    im_resized = im_pil.resize((16, 16))
     img_array = tf.keras.utils.img_to_array(im_resized)
     image = np.array(image, dtype="float") / 255.0            
     image=np.expand_dims(image, axis=0)

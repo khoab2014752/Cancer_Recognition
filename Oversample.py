@@ -28,4 +28,4 @@ def oversample_images(directory):
     
         if index == 500:
             break 
-oversample_images('D://Khoa/Cancer_Recognition/Types/healthy/')
+oversample_images('D://Khoa/Cancer_Recognition/Types/malignant/')

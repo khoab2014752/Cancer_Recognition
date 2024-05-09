@@ -1,6 +1,7 @@
 import numpy as np 
 import pandas as pd 
 import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt2
 import os
 import cv2
 from sklearn.model_selection import train_test_split
@@ -16,6 +17,7 @@ import numpy as np
 from sklearn.preprocessing import StandardScaler
 from imblearn.under_sampling import RandomUnderSampler, TomekLinks
 from imblearn.over_sampling import RandomOverSampler, SMOTE
+from keras.optimizers import LossScaleOptimizer
 
 
 #Tim hieu cach deploy len web - Khoa, Huan Luyen + plot mot cai learning curve
@@ -52,14 +54,14 @@ categories = ['healthy', 'malignant', 'benign', 'other']
 data = []#dữ liệu
 labels = []#nhãn
 imagePaths = []
-HEIGHT = 16
-WIDTH = 16
+HEIGHT = 128
+WIDTH = 128
 N_CHANNELS = 3
 
 # ===========================lay ngau nhien anh===================================
 
 for k, category in enumerate(categories):
-    for f in os.listdir(path+category):
+    for f in os.listdir(path+category): 
         imagePaths.append([path+category+'/'+f, k]) 
 
 import random
@@ -105,22 +107,44 @@ for i in range(16):
 
 #===
 EPOCHS = 200
-BS=16
+BS = 16
 Acc=[]
 Precision = []
 Recall = []
 F1 = []
 index=0
-learning_rates = 0.0001
+Index = []
+starter_learning_rate = 0.001
+end_learning_rate = 0.0001
+decay_steps = 10000
+
+
+
+lr_schedule = keras.optimizers.schedules.PolynomialDecay(
+    starter_learning_rate,
+    decay_steps,
+    end_learning_rate,
+    power=0.5,
+    cycle=False,
+    name="PolynomialDecay",
+)
+
 
 while index<3:
-    learning_rate = learning_rates[index]
+    if index == 1:
+        starter_learning_rate = 1e-3
+        end_learning_rate = 1e-5
+    if index == 2:
+        starter_learning_rate = 1e-4
+        end_learning_rate = 1e-5
+
     earlystop_callback = tf.keras.callbacks.EarlyStopping(
     monitor='loss',  # Monitor validation loss
-    min_delta=0.01,    # Minimum change to be considered an improvement
+    min_delta=0.0005,    # Minimum change to be considered an improvement
     patience=10,          # Stop training if no improvement for 10 epochs
     mode='min'           # 'min' for loss, 'max' for accuracy
 )
+    #CNN
     (trainX, testX, trainY, testY) = train_test_split(data, labels, test_size=0.3, random_state=30)# random_state=30)
     trainY = keras.utils.to_categorical(trainY, len(categories))
     class_names = categories
@@ -134,7 +158,9 @@ while index<3:
     model.add(Dense(84, activation='relu'))
     model.add(Dense(len(class_names), activation='softmax'))
 
-    model.compile(loss='categorical_crossentropy', optimizer=keras.optimizers.Nadam(learning_rate), metrics=['accuracy'])
+    
+
+    model.compile(loss='categorical_crossentropy', optimizer= keras.optimizers.Nadam(learning_rate=lr_schedule), metrics=['accuracy'])
 
     print(model.summary())
 
@@ -165,7 +191,7 @@ while index<3:
 
     plt.xlabel('Predicted')
     plt.ylabel('True')
-    plt.show()
+    # plt.show()
 
     print("Run:",index+1)
     print("\n")
@@ -198,9 +224,13 @@ while index<3:
     print('Recall:',Recall)
     print('F1:', F1)
     print("Current index: ",index)
+    Index.append(index)
     index= index+1
     
-
+    
+fig2 = plt2.figure()
+plt2.plot(Index, Acc) 
+plt2.show()
   
 print("Max index of acc",Acc.index(max(Acc))) 
 print("Max index of pre",Precision.index(max(Precision))) 
